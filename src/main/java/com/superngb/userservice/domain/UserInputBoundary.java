@@ -14,4 +14,5 @@ public interface UserInputBoundary {
     List<UserDtoModel> getUsers();
     UserDtoModel updateUser(UserUpdateModel userUpdateModel);
     UserDtoModel deleteUser(Long id);
+    boolean userExists(Long id);
 }

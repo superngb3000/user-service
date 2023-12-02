@@ -17,4 +17,6 @@ public interface UserOutputBoundary {
     UserDtoModel prepareSuccessDeleteUserView(UserDtoModel model);
     UserDtoModel prepareFailDeleteUserView();
     List<UserDtoModel> convertUser(List<UserDtoModel> modelList);
+    boolean prepareUserExistsView();
+    boolean prepareUserDoesNotExistView();
 }

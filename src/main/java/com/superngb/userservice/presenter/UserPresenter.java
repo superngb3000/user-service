@@ -52,4 +52,14 @@ public class UserPresenter implements UserOutputBoundary {
     public List<UserDtoModel> convertUser(List<UserDtoModel> modelList) {
         return modelList;
     }
+
+    @Override
+    public boolean prepareUserExistsView() {
+        return true;
+    }
+
+    @Override
+    public boolean prepareUserDoesNotExistView() {
+        return false;
+    }
 }

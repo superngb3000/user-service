@@ -1,5 +1,6 @@
 package com.superngb.userservice.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -8,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserUpdateModel {
+    @NotNull
     private Long id;
     private String name;
     private String email;

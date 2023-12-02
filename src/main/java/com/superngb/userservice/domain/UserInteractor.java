@@ -1,5 +1,7 @@
 package com.superngb.userservice.domain;
 
+import com.superngb.userservice.client.BoardServiceClient;
+import com.superngb.userservice.client.TaskServiceClient;
 import com.superngb.userservice.entity.User;
 import com.superngb.userservice.model.UserDtoModel;
 import com.superngb.userservice.model.UserPostModel;
@@ -16,20 +18,21 @@ public class UserInteractor implements UserInputBoundary {
 
     private final UserDataAccess userDataAccess;
     private final UserOutputBoundary userOutputBoundary;
+    private final BoardServiceClient boardServiceClient;
+    private final TaskServiceClient taskServiceClient;
 
-    public UserInteractor(UserDataAccess userDataAccess, UserOutputBoundary userOutputBoundary) {
+    public UserInteractor(UserDataAccess userDataAccess,
+                          UserOutputBoundary userOutputBoundary,
+                          BoardServiceClient boardServiceClient,
+                          TaskServiceClient taskServiceClient) {
         this.userDataAccess = userDataAccess;
         this.userOutputBoundary = userOutputBoundary;
+        this.boardServiceClient = boardServiceClient;
+        this.taskServiceClient = taskServiceClient;
     }
 
     @Override
     public UserDtoModel createUser(UserPostModel userPostModel) {
-        if (userPostModel == null
-                || userPostModel.getName() == null
-                || userPostModel.getEmail() == null
-                || userPostModel.getPassword() == null) {
-            return userOutputBoundary.prepareFailPostUserView();
-        }
         User userByEmail = userDataAccess.findByEmail(userPostModel.getEmail());
         return (userByEmail == null)
                 ? userOutputBoundary.prepareSuccessPostUserView(UserDtoModel.mapper(
@@ -72,12 +75,21 @@ public class UserInteractor implements UserInputBoundary {
         }
     }
 
-    //TODO убирать пользователей из списков в board и task
     @Override
     public UserDtoModel deleteUser(Long id) {
         User user = userDataAccess.deleteById(id);
-        return (user == null)
-                ? userOutputBoundary.prepareFailDeleteUserView()
-                : userOutputBoundary.prepareSuccessDeleteUserView(UserDtoModel.mapper(user));
+        if (user == null){
+            return userOutputBoundary.prepareFailDeleteUserView();
+        }
+        boardServiceClient.removeUserFromBoards(id);
+        taskServiceClient.removeUserFromTasks(id);
+        return userOutputBoundary.prepareSuccessDeleteUserView(UserDtoModel.mapper(user));
+    }
+
+    @Override
+    public boolean userExists(Long id) {
+        return (userDataAccess.findById(id) != null)
+                ? userOutputBoundary.prepareUserExistsView()
+                : userOutputBoundary.prepareUserDoesNotExistView();
     }
 }

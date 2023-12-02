@@ -4,12 +4,13 @@ import com.superngb.userservice.domain.UserInputBoundary;
 import com.superngb.userservice.model.UserDtoModel;
 import com.superngb.userservice.model.UserPostModel;
 import com.superngb.userservice.model.UserUpdateModel;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-//@RequestMapping("/users")
+@RequestMapping("/")
 public class UserController {
 
     private final UserInputBoundary userInputBoundary;
@@ -19,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDtoModel postUser(@RequestBody UserPostModel model){
+    public UserDtoModel postUser(@RequestBody @Valid UserPostModel model){
         return userInputBoundary.createUser(model);
     }
 
@@ -34,12 +35,17 @@ public class UserController {
     }
 
     @PutMapping
-    public UserDtoModel updateUser(@RequestBody UserUpdateModel model){
+    public UserDtoModel updateUser(@RequestBody @Valid UserUpdateModel model){
         return userInputBoundary.updateUser(model);
     }
 
     @DeleteMapping("/{id}")
     public UserDtoModel deleteUser(@PathVariable Long id){
         return userInputBoundary.deleteUser(id);
+    }
+
+    @GetMapping("/userExists/{id}")
+    boolean userExists(@PathVariable Long id){
+        return userInputBoundary.userExists(id);
     }
 }
