@@ -5,10 +5,13 @@ import com.superngb.userservice.model.UserDtoModel;
 import com.superngb.userservice.model.UserPostModel;
 import com.superngb.userservice.model.UserUpdateModel;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//TODO переделать все на ResponseEntity
 @RestController
 @RequestMapping("/")
 public class UserController {
@@ -24,9 +27,17 @@ public class UserController {
         return userInputBoundary.createUser(model);
     }
 
+//    @GetMapping("/{id}")
+//    public UserDtoModel getUser(@PathVariable Long id){
+//        return userInputBoundary.getUser(id);
+//    }
+
     @GetMapping("/{id}")
-    public UserDtoModel getUser(@PathVariable Long id){
-        return userInputBoundary.getUser(id);
+    public ResponseEntity<?> getUser(@PathVariable Long id){
+        UserDtoModel body = userInputBoundary.getUser(id);
+        return body == null
+                ? new ResponseEntity<>(HttpStatus.NOT_FOUND)
+                : new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     @GetMapping
