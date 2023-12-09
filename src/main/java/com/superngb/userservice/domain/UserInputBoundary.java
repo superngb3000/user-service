@@ -1,19 +1,22 @@
 package com.superngb.userservice.domain;
 
-import com.superngb.userservice.model.UserDtoModel;
+import com.superngb.userservice.model.ResponseModel;
 import com.superngb.userservice.model.UserPostModel;
 import com.superngb.userservice.model.UserUpdateModel;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
-//TODO пееределать под ResponseModel
 @Component
 public interface UserInputBoundary {
-    UserDtoModel createUser(UserPostModel userPostModel);
-    UserDtoModel getUser(Long id);
-    List<UserDtoModel> getUsers();
-    UserDtoModel updateUser(UserUpdateModel userUpdateModel);
-    UserDtoModel deleteUser(Long id);
-    boolean userExists(Long id);
+    ResponseModel<?> createUser(UserPostModel userPostModel);
+
+    ResponseModel<?> getUser(Long id);
+
+    ResponseModel<?> getUsers();
+
+    ResponseModel<?> updateUser(UserUpdateModel userUpdateModel);
+
+    ResponseModel<?> deleteUser(Long id);
+
+    ResponseModel<?> userExists(Long id);
 }

@@ -1,7 +1,7 @@
 package com.superngb.userservice.controller;
 
 import com.superngb.userservice.domain.UserInputBoundary;
-import com.superngb.userservice.model.UserDtoModel;
+import com.superngb.userservice.model.ResponseModel;
 import com.superngb.userservice.model.UserPostModel;
 import com.superngb.userservice.model.UserUpdateModel;
 import jakarta.validation.Valid;
@@ -9,9 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
-//TODO переделать все на ResponseEntity
 @RestController
 @RequestMapping("/")
 public class UserController {
@@ -23,40 +21,38 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDtoModel postUser(@RequestBody @Valid UserPostModel model){
-        return userInputBoundary.createUser(model);
+    public ResponseEntity<?> postUser(@RequestBody @Valid UserPostModel model) {
+        ResponseModel<?> response = userInputBoundary.createUser(model);
+        return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
     }
 
-//    @GetMapping("/{id}")
-//    public UserDtoModel getUser(@PathVariable Long id){
-//        return userInputBoundary.getUser(id);
-//    }
-
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(@PathVariable Long id){
-        UserDtoModel body = userInputBoundary.getUser(id);
-        return body == null
-                ? new ResponseEntity<>(HttpStatus.NOT_FOUND)
-                : new ResponseEntity<>(body, HttpStatus.OK);
+    public ResponseEntity<?> getUser(@PathVariable Long id) {
+        ResponseModel<?> response = userInputBoundary.getUser(id);
+        return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
     }
 
     @GetMapping
-    public List<UserDtoModel> getUsers(){
-        return userInputBoundary.getUsers();
+    public ResponseEntity<?> getUsers() {
+        ResponseModel<?> response = userInputBoundary.getUsers();
+        return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
     }
 
     @PutMapping
-    public UserDtoModel updateUser(@RequestBody @Valid UserUpdateModel model){
-        return userInputBoundary.updateUser(model);
+    public ResponseEntity<?> updateUser(@RequestBody @Valid UserUpdateModel model) {
+        ResponseModel<?> response = userInputBoundary.updateUser(model);
+        return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
     }
 
     @DeleteMapping("/{id}")
-    public UserDtoModel deleteUser(@PathVariable Long id){
-        return userInputBoundary.deleteUser(id);
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        ResponseModel<?> response = userInputBoundary.deleteUser(id);
+        return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
     }
 
     @GetMapping("/userExists/{id}")
-    boolean userExists(@PathVariable Long id){
-        return userInputBoundary.userExists(id);
+    public ResponseEntity<?> userExists(@PathVariable Long id) {
+        ResponseModel<?> response = userInputBoundary.userExists(id);
+        return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
     }
 }

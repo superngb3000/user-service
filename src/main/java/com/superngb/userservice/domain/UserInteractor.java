@@ -3,12 +3,12 @@ package com.superngb.userservice.domain;
 import com.superngb.userservice.client.BoardServiceClient;
 import com.superngb.userservice.client.TaskServiceClient;
 import com.superngb.userservice.entity.User;
+import com.superngb.userservice.model.ResponseModel;
 import com.superngb.userservice.model.UserDtoModel;
 import com.superngb.userservice.model.UserPostModel;
 import com.superngb.userservice.model.UserUpdateModel;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -17,55 +17,51 @@ import java.util.function.Supplier;
 public class UserInteractor implements UserInputBoundary {
 
     private final UserDataAccess userDataAccess;
-    private final UserOutputBoundary userOutputBoundary;
     private final BoardServiceClient boardServiceClient;
     private final TaskServiceClient taskServiceClient;
 
     public UserInteractor(UserDataAccess userDataAccess,
-                          UserOutputBoundary userOutputBoundary,
                           BoardServiceClient boardServiceClient,
                           TaskServiceClient taskServiceClient) {
         this.userDataAccess = userDataAccess;
-        this.userOutputBoundary = userOutputBoundary;
         this.boardServiceClient = boardServiceClient;
         this.taskServiceClient = taskServiceClient;
     }
 
     @Override
-    public UserDtoModel createUser(UserPostModel userPostModel) {
+    public ResponseModel<?> createUser(UserPostModel userPostModel) {
         User userByEmail = userDataAccess.findByEmail(userPostModel.getEmail());
         return (userByEmail == null)
-                ? userOutputBoundary.prepareSuccessPostUserView(UserDtoModel.mapper(
-                userDataAccess.save(User.builder()
+                ? ResponseModel.builder().code(201).body(UserDtoModel.mapper(userDataAccess.save(User.builder()
                         .name(userPostModel.getName())
                         .email(userPostModel.getEmail())
-                        .password(userPostModel.getPassword()).build())))
-                : userOutputBoundary.prepareFailPostUserView();
+                        .password(userPostModel.getPassword()).build()))).build()
+                : ResponseModel.builder().code(403).body("This email (" + userPostModel.getEmail() + ") has already been registered").build();
     }
 
     @Override
-    public UserDtoModel getUser(Long id) {
+    public ResponseModel<?> getUser(Long id) {
         User user = userDataAccess.findById(id);
         return (user == null)
-                ? userOutputBoundary.prepareFailGetUserView()
-                : userOutputBoundary.prepareSuccessGetUserView(UserDtoModel.mapper(user));
+                ? ResponseModel.builder().code(404).body("User with userId = " + id.toString() + " not found").build()
+                : ResponseModel.builder().code(200).body(UserDtoModel.mapper(user)).build();
     }
 
     @Override
-    public List<UserDtoModel> getUsers() {
-        return userOutputBoundary.convertUser(UserDtoModel.mapper(userDataAccess.getUsers()));
+    public ResponseModel<?> getUsers() {
+        return ResponseModel.builder().code(200).body(UserDtoModel.mapper(userDataAccess.getUsers())).build();
     }
 
     @Override
-    public UserDtoModel updateUser(UserUpdateModel userUpdateModel) {
+    public ResponseModel<?> updateUser(UserUpdateModel userUpdateModel) {
         User userById = userDataAccess.findById(userUpdateModel.getId());
         if (userById == null) {
-            return userOutputBoundary.prepareFailUpdateUserView();
+            return ResponseModel.builder().code(404).body("User with userId = " + userUpdateModel.getId().toString() + " not found").build();
         }
         updateFieldIfNotNull(userUpdateModel.getEmail(), userById::getEmail, userById::setEmail);
         updateFieldIfNotNull(userUpdateModel.getName(), userById::getName, userById::setName);
         updateFieldIfNotNull(userUpdateModel.getPassword(), userById::getPassword, userById::setPassword);
-        return userOutputBoundary.prepareSuccessUpdateUserView(UserDtoModel.mapper(userDataAccess.save(userById)));
+        return ResponseModel.builder().code(200).body(UserDtoModel.mapper(userDataAccess.save(userById))).build();
     }
 
     private <T> void updateFieldIfNotNull(T newValue, Supplier<T> currentValueSupplier, Consumer<T> updateFunction) {
@@ -76,20 +72,21 @@ public class UserInteractor implements UserInputBoundary {
     }
 
     @Override
-    public UserDtoModel deleteUser(Long id) {
+    public ResponseModel<?> deleteUser(Long id) {
         User user = userDataAccess.deleteById(id);
         if (user == null){
-            return userOutputBoundary.prepareFailDeleteUserView();
+            return ResponseModel.builder().code(404).body("User with userId = " + id.toString() + " not found").build();
         }
         boardServiceClient.removeUserFromBoards(id);
         taskServiceClient.removeUserFromTasks(id);
-        return userOutputBoundary.prepareSuccessDeleteUserView(UserDtoModel.mapper(user));
+        return ResponseModel.builder().code(200).body(UserDtoModel.mapper(userDataAccess.save(user))).build();
     }
 
     @Override
-    public boolean userExists(Long id) {
-        return (userDataAccess.findById(id) != null)
-                ? userOutputBoundary.prepareUserExistsView()
-                : userOutputBoundary.prepareUserDoesNotExistView();
+    public ResponseModel<?> userExists(Long id) {
+        User user = userDataAccess.findById(id);
+        return (user == null)
+                ? ResponseModel.builder().code(404).body(false).build()
+                : ResponseModel.builder().code(200).body(true).build();
     }
 }
