@@ -49,10 +49,4 @@ public class UserController {
         ResponseModel<?> response = userInputBoundary.deleteUser(id);
         return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
     }
-
-    @GetMapping("/userExists/{id}")
-    public ResponseEntity<?> userExists(@PathVariable Long id) {
-        ResponseModel<?> response = userInputBoundary.userExists(id);
-        return new ResponseEntity<>(response.getBody(), HttpStatus.valueOf(response.getCode()));
-    }
 }

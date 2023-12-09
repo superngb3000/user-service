@@ -17,6 +17,4 @@ public interface UserInputBoundary {
     ResponseModel<?> updateUser(UserUpdateModel userUpdateModel);
 
     ResponseModel<?> deleteUser(Long id);
-
-    ResponseModel<?> userExists(Long id);
 }

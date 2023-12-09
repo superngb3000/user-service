@@ -33,9 +33,9 @@ public class UserInteractor implements UserInputBoundary {
         User userByEmail = userDataAccess.findByEmail(userPostModel.getEmail());
         return (userByEmail == null)
                 ? ResponseModel.builder().code(201).body(UserDtoModel.mapper(userDataAccess.save(User.builder()
-                        .name(userPostModel.getName())
-                        .email(userPostModel.getEmail())
-                        .password(userPostModel.getPassword()).build()))).build()
+                .name(userPostModel.getName())
+                .email(userPostModel.getEmail())
+                .password(userPostModel.getPassword()).build()))).build()
                 : ResponseModel.builder().code(403).body("This email (" + userPostModel.getEmail() + ") has already been registered").build();
     }
 
@@ -74,19 +74,11 @@ public class UserInteractor implements UserInputBoundary {
     @Override
     public ResponseModel<?> deleteUser(Long id) {
         User user = userDataAccess.deleteById(id);
-        if (user == null){
+        if (user == null) {
             return ResponseModel.builder().code(404).body("User with userId = " + id.toString() + " not found").build();
         }
         boardServiceClient.removeUserFromBoards(id);
         taskServiceClient.removeUserFromTasks(id);
         return ResponseModel.builder().code(200).body(UserDtoModel.mapper(userDataAccess.save(user))).build();
-    }
-
-    @Override
-    public ResponseModel<?> userExists(Long id) {
-        User user = userDataAccess.findById(id);
-        return (user == null)
-                ? ResponseModel.builder().code(404).body(false).build()
-                : ResponseModel.builder().code(200).body(true).build();
     }
 }
