@@ -8,8 +8,12 @@ import java.util.List;
 @Component
 public interface UserDataAccess {
     User save(User user);
+
     User findById(Long id);
+
     User findByEmail(String email);
+
     List<User> getUsers();
+
     User deleteById(Long id);
 }

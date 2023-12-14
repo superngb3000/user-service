@@ -15,7 +15,7 @@ public class UserDtoModel {
     private String name;
     private String email;
 
-    public static UserDtoModel mapper(User user){
+    public static UserDtoModel mapper(User user) {
         return new UserDtoModel(
                 user.getId(),
                 user.getName(),
@@ -23,7 +23,7 @@ public class UserDtoModel {
         );
     }
 
-    public static List<UserDtoModel> mapper(List<User> userList){
+    public static List<UserDtoModel> mapper(List<User> userList) {
         return userList.stream()
                 .map(UserDtoModel::mapper)
                 .toList();
